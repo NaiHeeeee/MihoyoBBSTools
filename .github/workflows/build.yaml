@@ -55,7 +55,7 @@ jobs:
             OUT_FILE_NAME: MihoyoBBSTools-${{ github.ref_name }}-Linux-x64
             ASSET_MIME: application/zip 
     steps:
-    - uses: actions/checkout@v1
+    - uses: actions/checkout@v4
     - name: Set up Python 3.12
       uses: actions/setup-python@v2
       with:
@@ -67,7 +67,7 @@ jobs:
     - name: Build with pyinstaller for ${{ matrix.TARGET }}
       run: ${{ matrix.CMD_BUILD }}
     - name: Load Release URL File from release job
-      uses: actions/download-artifact@v1
+      uses: actions/download-artifact@v4
       with:
         name: release_url
     - name: Get Release File Name & Upload URL

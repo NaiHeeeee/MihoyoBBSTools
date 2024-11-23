@@ -1,5 +1,6 @@
 import collections
 import os
+import sys
 import yaml
 from copy import deepcopy
 
@@ -59,13 +60,38 @@ config = {
 }
 config_raw = deepcopy(config)
 
-path = os.path.dirname(os.path.realpath(__file__)) + "/config"
+# path = os.path.dirname(os.path.realpath(__file__)) + "/config"
+# if os.getenv("AutoMihoyoBBS_config_path") is not None:
+#     path = os.getenv("AutoMihoyoBBS_config_path")
+# config_prefix = os.getenv("AutoMihoyoBBS_config_prefix")
+# if config_prefix is None:
+#     config_prefix = ""
+# config_Path = f"{path}/{config_prefix}config.yaml"
+
+
+
+# 判断是否为打包后的程序
+if getattr(sys, 'frozen', False):  # 判断是否为打包后运行
+    # 如果是打包后的程序，使用 sys._MEIPASS 获取解压后的路径
+    path = os.path.dirname(sys.executable)  # 获取打包后的可执行文件所在目录
+else:
+    # 如果是源代码环境，使用当前脚本的路径
+    path = os.path.dirname(os.path.realpath(__file__))  # 获取当前脚本所在的目录
+
+# 检查是否有环境变量指定配置文件路径
 if os.getenv("AutoMihoyoBBS_config_path") is not None:
     path = os.getenv("AutoMihoyoBBS_config_path")
+
+# 获取配置文件前缀
 config_prefix = os.getenv("AutoMihoyoBBS_config_prefix")
 if config_prefix is None:
     config_prefix = ""
-config_Path = f"{path}/{config_prefix}config.yaml"
+
+# 构建配置文件路径，确保指向 config/config.yaml
+config_Path = os.path.join(path, "config", f"{config_prefix}config.yaml")
+
+print(f"Config path: {config_Path}")
+
 
 
 def copy_config():

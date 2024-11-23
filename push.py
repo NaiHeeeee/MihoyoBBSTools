@@ -16,15 +16,26 @@ config_path = os.path.join(os.path.dirname(os.path.realpath(__file__)), 'config'
 config_name = "push"
 
 
-def get_config_path():
-    file_path = config_path
-    file_name = config_name
-    if os.getenv("AutoMihoyoBBS_push_path"):
-        file_path = os.getenv("AutoMihoyoBBS_push_path")
-    if os.getenv("AutoMihoyoBBS_push_name"):
-        file_name = os.getenv("AutoMihoyoBBS_push_name")
-    return os.path.join(file_path, f'{file_name}.ini')
+# def get_config_path():
+#     file_path = config_path
+#     file_name = config_name
+#     if os.getenv("AutoMihoyoBBS_push_path"):
+#         file_path = os.getenv("AutoMihoyoBBS_push_path")
+#     if os.getenv("AutoMihoyoBBS_push_name"):
+#         file_name = os.getenv("AutoMihoyoBBS_push_name")
+#     return os.path.join(file_path, f'{file_name}.ini')
 
+def get_config_path():
+    # 默认路径和文件名
+    default_path = "config"
+    default_name = "push"
+    
+    # 获取环境变量覆盖值（如果存在）
+    file_path = os.getenv("AutoMihoyoBBS_push_path", default_path)
+    file_name = os.getenv("AutoMihoyoBBS_push_name", default_name)
+    
+    # 拼接完整路径
+    return os.path.join(file_path, f"{file_name}.ini")
 
 def load_config():
     file_path = get_config_path()

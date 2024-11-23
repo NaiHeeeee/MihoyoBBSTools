@@ -114,3 +114,9 @@ competition:
     account: []
     checkin: false
     weekly: false
+
+#接码平台
+captcha:
+  #apikey
+  token: ""
+  enable: false

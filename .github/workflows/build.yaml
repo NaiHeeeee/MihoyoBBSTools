@@ -1,0 +1,103 @@
+name: Build and Release Executables
+
+on:
+  push:
+    tags:
+      - 'v*.*.*'
+
+jobs:
+  build-windows:
+    runs-on: windows-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v3
+
+      - name: Set up Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: '3.12'
+
+      - name: Install dependencies
+        run: pip install -r requirements.txt
+
+      - name: Install PyInstaller
+        run: pip install pyinstaller==6.11.1
+
+      - name: Build Executable (Windows x64)
+        run: pyinstaller --onefile --name "MihoyoBBSTools-Windows-x64" --windowed main.spec
+
+      - name: Upload artifact
+        uses: actions/upload-artifact@v3
+        with:
+          name: MihoyoBBSTools-Windows-x64
+          path: dist/MihoyoBBSTools-Windows-x64.exe
+
+  build-linux:
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        arch: [amd64, arm64]
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v3
+
+      - name: Set up Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: '3.12'
+
+      - name: Install dependencies
+        run: pip install -r requirements.txt
+
+      - name: Install PyInstaller
+        run: pip install pyinstaller==6.11.1
+
+      - name: Build Executable (Linux ${{ matrix.arch }})
+        run: |
+          pyinstaller --onefile --name "MihoyoBBSTools-Linux-${{ matrix.arch }}" --windowed main.spec
+
+      - name: Upload artifact
+        uses: actions/upload-artifact@v3
+        with:
+          name: MihoyoBBSTools-Linux-${{ matrix.arch }}
+          path: dist/MihoyoBBSTools-Linux-${{ matrix.arch }}
+
+  release:
+    runs-on: ubuntu-latest
+    needs:
+      - build-windows
+      - build-linux
+    steps:
+      - name: Download Windows artifact
+        uses: actions/download-artifact@v3
+        with:
+          name: MihoyoBBSTools-Windows-x64
+          path: ./artifacts
+
+      - name: Download Linux amd64 artifact
+        uses: actions/download-artifact@v3
+        with:
+          name: MihoyoBBSTools-Linux-amd64
+          path: ./artifacts
+
+      - name: Download Linux arm64 artifact
+        uses: actions/download-artifact@v3
+        with:
+          name: MihoyoBBSTools-Linux-arm64
+          path: ./artifacts
+
+      - name: Create Release
+        uses: ncipollo/release-action@v1
+        with:
+          artifacts: |
+            ./artifacts/MihoyoBBSTools-Windows-x64.exe
+            ./artifacts/MihoyoBBSTools-Linux-amd64
+            ./artifacts/MihoyoBBSTools-Linux-arm64
+          token: ${{ secrets.GITHUB_TOKEN }}
+          tag: ${{ github.ref_name }}
+          name: Release ${{ github.ref_name }}
+          body: |
+            This release includes executables for:
+            - Windows x64
+            - Linux amd64
+            - Linux arm64

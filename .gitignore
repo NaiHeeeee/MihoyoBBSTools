@@ -150,6 +150,6 @@ yaml/
 # PyInstaller
 build/
 dist/
-*.spec
+# *.spec
 
 *.tmp

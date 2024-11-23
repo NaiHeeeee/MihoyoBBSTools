@@ -15,7 +15,7 @@ jobs:
       - name: Set up Python
         uses: actions/setup-python@v4
         with:
-          python-version: '3.12'
+          python-version: '3.10'
 
       - name: Install dependencies
         run: pip install -r requirements.txt
@@ -24,7 +24,7 @@ jobs:
         run: pip install pyinstaller==6.11.1
 
       - name: Build Executable (Windows x64)
-        run: pyinstaller --onefile --name "MihoyoBBSTools-Windows-x64" --windowed main.spec
+        run: pyinstaller --onefile --name "MihoyoBBSTools-Windows-x64" main.spec
 
       - name: Upload artifact
         uses: actions/upload-artifact@v3
@@ -44,7 +44,7 @@ jobs:
       - name: Set up Python
         uses: actions/setup-python@v4
         with:
-          python-version: '3.12'
+          python-version: '3.10'
 
       - name: Install dependencies
         run: pip install -r requirements.txt
@@ -54,7 +54,7 @@ jobs:
 
       - name: Build Executable (Linux ${{ matrix.arch }})
         run: |
-          pyinstaller --onefile --name "MihoyoBBSTools-Linux-${{ matrix.arch }}" --windowed main.spec
+          pyinstaller --onefile --name "MihoyoBBSTools-Linux-${{ matrix.arch }}" main.spec
 
       - name: Upload artifact
         uses: actions/upload-artifact@v3

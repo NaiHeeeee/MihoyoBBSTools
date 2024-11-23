@@ -39,19 +39,19 @@ jobs:
             # MEMO TODO: Add version number to the app name, zip does not supports dots, you have to use - instead
             TARGET: macos
             CMD_BUILD: >
-                pyinstaller -F -w -n MihoyoBBSTools-Mac-x64 -i resources/icon.icns main.py &&
+                pyinstaller -F -n MihoyoBBSTools-Mac-x64 main.py &&
                 cd dist/ &&
                 zip -r9 MihoyoBBSTools-Mac-x64 MihoyoBBSTools-Mac-x64.app/                
             OUT_FILE_NAME: MihoyoBBSTools-Mac-x64.zip
             ASSET_MIME: application/zip
           - os: windows-latest
             TARGET: windows
-            CMD_BUILD: pyinstaller -F -w -n MihoyoBBSTools-${{ github.ref_name }}-Win-x64 -i resources/icon.ico main.py
+            CMD_BUILD: pyinstaller -F -n MihoyoBBSTools-${{ github.ref_name }}-Win-x64 main.py
             OUT_FILE_NAME: MihoyoBBSTools-${{ github.ref_name }}-Win-x64.exe
             ASSET_MIME: application/vnd.microsoft.portable-executable
           - os: ubuntu-latest
             TARGET: linux
-            CMD_BUILD: pyinstaller -F -n MihoyoBBSTools-${{ github.ref_name }}-Linux-x64 -i resources/icon.ico main.py
+            CMD_BUILD: pyinstaller -F -n MihoyoBBSTools-${{ github.ref_name }}-Linux-x64 main.py
             OUT_FILE_NAME: MihoyoBBSTools-${{ github.ref_name }}-Linux-x64
             ASSET_MIME: application/zip 
     steps:

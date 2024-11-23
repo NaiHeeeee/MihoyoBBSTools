@@ -35,15 +35,6 @@ jobs:
     strategy:
       matrix:
         include:
-          - os: macos-latest
-            # MEMO TODO: Add version number to the app name, zip does not supports dots, you have to use - instead
-            TARGET: macos
-            CMD_BUILD: >
-                pyinstaller -F -n MihoyoBBSTools-Mac-x64 main.py &&
-                cd dist/ &&
-                zip -r9 MihoyoBBSTools-Mac-x64 MihoyoBBSTools-Mac-x64.app/                
-            OUT_FILE_NAME: MihoyoBBSTools-Mac-x64.zip
-            ASSET_MIME: application/zip
           - os: windows-latest
             TARGET: windows
             CMD_BUILD: pyinstaller -F -n MihoyoBBSTools-${{ github.ref_name }}-Win-x64 main.py
@@ -66,6 +57,10 @@ jobs:
         pip install -r requirements.txt        
     - name: Build with pyinstaller for ${{ matrix.TARGET }}
       run: ${{ matrix.CMD_BUILD }}
+    - name: Create a zip of the config folder
+      run: |
+        mkdir -p ./dist/config.zip
+        zip -r ./dist/config.zip ./config
     - name: Load Release URL File from release job
       uses: actions/download-artifact@v4
       with:
@@ -76,13 +71,23 @@ jobs:
       run: |
         value=`cat release_url/release_url.txt`
         echo ::set-output name=upload_url::$value        
-    - name: Upload Release Asset
-      id: upload-release-asset
+    - name: Upload Release Asset for App
+      id: upload-release-asset-app
       uses: actions/upload-release-asset@v1
       env:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       with:
         upload_url: ${{ steps.get_release_info.outputs.upload_url }}
-        asset_path: ./dist/${{ matrix.OUT_FILE_NAME}}
-        asset_name: ${{ matrix.OUT_FILE_NAME}}
-        asset_content_type: ${{ matrix.ASSET_MIME}}
+        asset_path: ./dist/${{ matrix.OUT_FILE_NAME }}
+        asset_name: ${{ matrix.OUT_FILE_NAME }}
+        asset_content_type: ${{ matrix.ASSET_MIME }}
+    - name: Upload Release Asset for Config
+      id: upload-release-asset-config
+      uses: actions/upload-release-asset@v1
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      with:
+        upload_url: ${{ steps.get_release_info.outputs.upload_url }}
+        asset_path: ./dist/config.zip
+        asset_name: config.zip
+        asset_content_type: application/zip

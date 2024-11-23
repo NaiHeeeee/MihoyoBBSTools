@@ -1,103 +1,101 @@
-name: Build and Release Executables
+name: PyInstaller Build and Release
 
 on:
   push:
     tags:
-      - 'v*.*.*'
+      - 'v*.*.*' # Trigger on version tags (e.g., v1.0.0)
 
 jobs:
-  build-windows:
-    runs-on: windows-latest
+  pyinstaller-windows-x64-build:
+    runs-on: <windows-latest / ubuntu-latest / ..... etc>
     steps:
-      - name: Checkout code
-        uses: actions/checkout@v3
-
-      - name: Set up Python
-        uses: actions/setup-python@v4
+      - name: Create Executable
+        uses: sayyid5416/pyinstaller@v1
         with:
-          python-version: '3.10'
+          python_ver: '3.6'
+          python_arch: 'x64'
+          pyinstaller_ver: '==6.11.1'
+          spec: 'main.spec'
+          requirements: 'requirements.txt'
+          upload_exe_with_name: 'MihoyoBBSTools'
+          options: --onefile, --name "MihoyoBBSTools"
 
-      - name: Install dependencies
-        run: pip install -r requirements.txt
-
-      - name: Install PyInstaller
-        run: pip install pyinstaller==6.11.1
-
-      - name: Build Executable (Windows x64)
-        run: pyinstaller --onefile --name "MihoyoBBSTools-Windows-x64" main.spec
-
-      - name: Upload artifact
-        uses: actions/upload-artifact@v3
-        with:
-          name: MihoyoBBSTools-Windows-x64
-          path: dist/MihoyoBBSTools-Windows-x64.exe
-
-  build-linux:
+  pyinstaller-linux-arm64-build:
     runs-on: ubuntu-latest
-    strategy:
-      matrix:
-        arch: [amd64, arm64]
     steps:
-      - name: Checkout code
-        uses: actions/checkout@v3
-
-      - name: Set up Python
-        uses: actions/setup-python@v4
+      - name: Create Executable
+        uses: sayyid5416/pyinstaller@v1
         with:
-          python-version: '3.10'
+          python_ver: '3.10'
+          python_arch: 'arm64'
+          pyinstaller_ver: '==6.11.1'
+          spec: 'main.spec'
+          requirements: 'requirements.txt'
+          upload_exe_with_name: 'MihoyoBBSTools'
+          options: --onefile, --name "MihoyoBBSTools"
 
-      - name: Install dependencies
-        run: pip install -r requirements.txt
-
-      - name: Install PyInstaller
-        run: pip install pyinstaller==6.11.1
-
-      - name: Build Executable (Linux ${{ matrix.arch }})
-        run: |
-          pyinstaller --onefile --name "MihoyoBBSTools-Linux-${{ matrix.arch }}" main.spec
-
-      - name: Upload artifact
-        uses: actions/upload-artifact@v3
+  pyinstaller-linux-amd64-build:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Create Executable
+        uses: sayyid5416/pyinstaller@v1
         with:
-          name: MihoyoBBSTools-Linux-${{ matrix.arch }}
-          path: dist/MihoyoBBSTools-Linux-${{ matrix.arch }}
+          python_ver: '3.10'
+          python_arch: 'amd64'
+          pyinstaller_ver: '==6.11.1'
+          spec: 'main.spec'
+          requirements: 'requirements.txt'
+          upload_exe_with_name: 'MihoyoBBSTools'
+          options: --onefile, --name "MihoyoBBSTools" 
 
   release:
     runs-on: ubuntu-latest
     needs:
-      - build-windows
-      - build-linux
+      - pyinstaller-windows-x64-build
+      - pyinstaller-linux-arm64-build
+      - pyinstaller-linux-amd64-build
     steps:
-      - name: Download Windows artifact
+      - name: Download Artifacts
         uses: actions/download-artifact@v3
         with:
-          name: MihoyoBBSTools-Windows-x64
-          path: ./artifacts
-
-      - name: Download Linux amd64 artifact
-        uses: actions/download-artifact@v3
-        with:
-          name: MihoyoBBSTools-Linux-amd64
-          path: ./artifacts
-
-      - name: Download Linux arm64 artifact
-        uses: actions/download-artifact@v3
-        with:
-          name: MihoyoBBSTools-Linux-arm64
           path: ./artifacts
 
       - name: Create Release
-        uses: ncipollo/release-action@v1
+        uses: actions/create-release@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
-          artifacts: |
-            ./artifacts/MihoyoBBSTools-Windows-x64.exe
-            ./artifacts/MihoyoBBSTools-Linux-amd64
-            ./artifacts/MihoyoBBSTools-Linux-arm64
-          token: ${{ secrets.GITHUB_TOKEN }}
-          tag: ${{ github.ref_name }}
-          name: Release ${{ github.ref_name }}
-          body: |
-            This release includes executables for:
-            - Windows x64
-            - Linux amd64
-            - Linux arm64
+          tag_name: ${{ github.ref_name }}
+          release_name: "Release ${{ github.ref_name }}"
+          draft: false
+          prerelease: false
+
+      - name: Upload Release Assets
+        uses: actions/upload-release-asset@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          upload_url: ${{ steps.create_release.outputs.upload_url }}
+          asset_path: ./artifacts/MihoyoBBSTools-windows-x64/MihoyoBBSTools.exe
+          asset_name: MihoyoBBSTools-windows-x64.exe
+          asset_content_type: application/octet-stream
+
+      - name: Upload Release Assets (Linux ARM64)
+        uses: actions/upload-release-asset@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          upload_url: ${{ steps.create_release.outputs.upload_url }}
+          asset_path: ./artifacts/MihoyoBBSTools-linux-arm64/MihoyoBBSTools
+          asset_name: MihoyoBBSTools-linux-arm64
+          asset_content_type: application/octet-stream
+
+      - name: Upload Release Assets (Linux AMD64)
+        uses: actions/upload-release-asset@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          upload_url: ${{ steps.create_release.outputs.upload_url }}
+          asset_path: ./artifacts/MihoyoBBSTools-linux-amd64/MihoyoBBSTools
+          asset_name: MihoyoBBSTools-linux-amd64
+          asset_content_type: application/octet-stream                 

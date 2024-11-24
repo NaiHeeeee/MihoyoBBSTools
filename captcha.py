@@ -72,7 +72,7 @@ def bbs_captcha(gt: str, challenge: str):
 
 def geetest(gt: str, challenge: str, referer: str):
     response = http.post('http://api.rrocr.com/api/recognize.html', params={
-        'appkey': config.config['captcha']['token'],
+        'appkey': config['captcha']['token'],
         'gt': gt,
         'challenge': challenge,
         'referer': referer
